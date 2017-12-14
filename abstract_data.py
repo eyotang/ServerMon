@@ -12,10 +12,12 @@ import getCmds
 import del_old_file
 from write_log import writeLog
 
+import paramiko, scp
 
 #需要手动配置的数据
 #SERVER_NAME = ['srs_2.0.0.','nginx']#'nginx'    #可以输入nginx或者srs
 SERVERS_D = {'1935':'srs-rtmp','18080':'srs-hls','80':'nginx'}
+REPORT_SERVER = {"ip": "10.23.102.24", "username": "root", "password": "root000", "location": "/reports"}
 
 #系统语言编码
 LANG = "en_US.UTF-8"
@@ -46,8 +48,8 @@ def get_local_ip():
     try:
         ip = os.popen("ifconfig | grep 'inet addr' | awk '{print $2}'").read()
         ip = ip[ip.find(':') + 1:ip.find('\n')]
-    except Exception,e:
-        print e
+    except Exception as e:
+        print(e)
     return ip
 
 #将最终采集数据打包
@@ -56,7 +58,8 @@ def to_tar():
     times = time.strftime("%Y-%m-%d-%H-%M-%S",time.localtime())
     subprocess.call("cp res/linking_number res/timeConsum " +"res/%s "*len(SERVERS_D.items()) %tuple([v + "\:" + k for k,v in SERVERS_D.items()]) + "result/",shell=True)
     files = ["result/" + filename for filename in os.listdir("result/")]
-    cmd = 'tar -cf SYS_KPI_'+ ip + "_" + times + '.tar' + ' %s'*len(files) %tuple(files)
+    tar_file_name = 'SYS_KPI_'+ ip + "_" + times + '.tar'
+    cmd = 'tar -cf ' + tar_file_name + ' %s'*len(files) %tuple(files)
     try:
         subprocess.call(cmd,shell=True)
     except Exception as err:
@@ -64,6 +67,25 @@ def to_tar():
         exit()
 
     writeLog("INFO",r">>>>> 指标文件打包完成")
+    return tar_file_name
+
+def scp_tar(tar_file):
+    ip = REPORT_SERVER.get("ip")
+    username = REPORT_SERVER.get("username")
+    password = REPORT_SERVER.get("password")
+    location = REPORT_SERVER.get("location")
+    if not (ip and username and password and location):
+        writeLog("CRITICAL", r">>>>> 信息不全，不能上传压缩包")
+        return
+
+    remote = os.path.join(location, tar_file)
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(ip, 22, username, password)
+    with scp.SCPClient(ssh.get_transport()) as s:
+        s.put(tar_file, remote_path=remote)
+    s.close()
+    writeLog("INFO", r">>>>> 上传压缩包完成")
 
 
 #脚本主入口函数
@@ -81,8 +103,10 @@ def main_start():
     AbstractKPI(cmds).abstract_kpi()
 
     #将result目录下的解析后的kpi文件打包
-    to_tar()
+    tar_file = to_tar()
     writeLog("INFO",r">>>>> 指标数据提取并打包完成")
+
+    scp_tar(tar_file)
 
 if __name__ == '__main__':
     main_start()

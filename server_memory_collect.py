@@ -16,9 +16,12 @@ def serverMemoryCollect(servers,intervaltime,tcpNum,getLinkObj):
     getLinkNum = getLinkObj
     memRecord = Record_Data("res/%s" %(servers[1]+":"+servers[0]))
     cmd = "ps -ef | grep %s | grep -v grep | awk \'{print $2}\'" %servers[1]
-    f = subprocess.Popen(cmd,stdout=subprocess.PIPE,shell=True)
+    (status_code, lines) = subprocess.getstatusoutput(cmd)
     writeLog("INFO",">>>>> %s 指标采集进程执行中....." %servers[1])
-    pids = [pid.strip() for pid in f.stdout]
+    if not lines:
+        return -1
+
+    pids = lines.split("\n")
 
     heard = [servers[1],'used','Linking_Number Memory_Capacity(MB)']
     try:
@@ -27,11 +30,11 @@ def serverMemoryCollect(servers,intervaltime,tcpNum,getLinkObj):
         loops = 0
         while True:
             vrss = []
-            for p in pids:
-                cmd2 = "cat /proc/%s/status | grep VmRSS | awk \'{print $2}\'" %p
-                rss = subprocess.Popen(cmd2,stdout=subprocess.PIPE,shell=True).stdout
-                vrss.append(int(rss.readline().strip()))
-            memRecord.recordData(['%s' %(str(sum(vrss)/1024))])
+            for pid in pids:
+                cmd2 = "cat /proc/%s/status | grep VmRSS | awk \'{print $2}\'" %(pid)
+                (status_code, result) = subprocess.getstatusoutput(cmd2)
+                vrss.append(int(result))
+            memRecord.recordData([str(sum(vrss)/1024)])
             if curr_tcpN <= tcpNum:
                 if loops == 15:
                     #15s之内，当前连接数小于初始化连接数，程序退出

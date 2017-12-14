@@ -133,10 +133,21 @@ class KPI_Collect(object):
 
 
 g_starttime = time.time()
-def onsignal_int(signum, frame) :
+def cleanup():
     time_consum = time.time() - g_starttime
     timeRecord = Record_Data("res/timeConsum")
     timeRecord.recordData([str(time_consum)])
+    names = ['sar','iostat']
+    cmd = "killall -9 %s %s" %tuple(names)
+    subprocess.call(cmd,shell=True)
+    abstract()
+
+def abstract():
+    # 提取数据，上传压缩包
+    (status_code, result) = subprocess.getstatusoutput("python3 abstract_data.py")
+
+def onsignal_int(signum, frame) :
+    cleanup()
     print ("\nReceive SIGINT[Ctrl+C] to stop process by force !")
     sys.exit(-1)
 

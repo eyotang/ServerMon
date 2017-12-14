@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='utf-8'?>
+<abstract>
+    <res_file name="res/CPU">
+        <uniqflag>CPU</uniqflag>
+        <object_file>result/cpu_status</object_file>
+        <graphtitle>CPU使用状态</graphtitle>
+        <linelabel>%user %system</linelabel>
+        <x_y_label>时间(s) Cpu使用率(%)</x_y_label>
+        <cmd>cat %s | egrep -v "Linux|^$|%s" | awk 'BEGIN {print "%s\n%s\n%s"}{if($2 ~/AM|PM/) print $4,$6}' >> %s</cmd>
+    </res_file>
+    <res_file name="res/Memory">
+        <uniqflag>kbmemused</uniqflag>
+        <object_file>result/mem_status</object_file>
+        <graphtitle>内存使用状态</graphtitle>
+        <linelabel>%mem %mem+swap</linelabel>
+        <x_y_label>时间(s) 内存使用率(%)</x_y_label>
+        <cmd>cat %s | egrep -v "Linux|^$|%s" | awk 'BEGIN {print "%s\n%s\n%s"}{if($2 ~/AM|PM/) print $5,$9}' >> %s</cmd>
+    </res_file>
+    <res_file name="res/NetWork">
+        <uniqflag>IFACE</uniqflag>
+        <object_file>result/network_status</object_file>
+        <graphtitle>网络使用情况</graphtitle>
+        <linelabel>rxpck/s txpck/s rxkB/s txkB/s</linelabel>
+        <x_y_label>时间(s) 网络IO</x_y_label>
+        <cmd>cat %s | egrep -v "Linux|^$|%s" | awk 'BEGIN {print "%s\n%s\n%s"}{if($3 ~/eth0/) print $4,$5,$6,$7}' >> %s</cmd>
+    </res_file>
+    <res_file name="res/Disk">
+        <uniqflag>Device</uniqflag>
+        <object_file>result/disk_status</object_file>
+        <graphtitle>磁盘使用情况</graphtitle>
+        <linelabel>rrqm/s wrqm/s</linelabel>
+        <x_y_label>时间(s) 磁盘IO</x_y_label>
+        <cmd>cat %s | egrep -v "Linux|^$|%s" | awk 'BEGIN {print "%s\n%s\n%s"}{if($1 ~/vdc/) print $2,$3}' >> %s</cmd>
+    </res_file>
+</abstract>
