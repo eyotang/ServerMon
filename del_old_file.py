@@ -7,5 +7,8 @@ class Del_Old_File(object):
         self.directory = directory
 
     def del_old_file(self):
+        if not os.path.exists(self.directory):
+            return
+
         for f in os.listdir(self.directory):
             os.unlink(os.path.join(self.directory, f))
