@@ -8,6 +8,7 @@ class Del_Old_File(object):
 
     def del_old_file(self):
         if not os.path.exists(self.directory):
+            os.makedirs(self.directory)
             return
 
         for f in os.listdir(self.directory):

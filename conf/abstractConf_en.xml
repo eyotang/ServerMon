@@ -16,4 +16,20 @@
         <x_y_label>Time(s) Mem_Usage(%)</x_y_label>
         <cmd>cat %s | egrep -v "Linux|^$|%s" | awk 'BEGIN {print "%s\n%s\n%s"}{if($2 ~/AM|PM/) print $5,$9}' >> %s</cmd>
     </res_file>
+    <res_file name="res/NetWork">
+        <uniqflag>IFACE</uniqflag>
+        <object_file>result/network_status</object_file>
+        <graphtitle>Network_Status</graphtitle>
+        <linelabel>rxpck/s txpck/s rxkB/s txkB/s</linelabel>
+        <x_y_label>Time(s) Network_IO</x_y_label>
+        <cmd>cat %s | egrep -v "Linux|^$|%s" | awk 'BEGIN {print "%s\n%s\n%s"}{if($3 ~/eth0/) print $4,$5,$6,$7}' >> %s</cmd>
+    </res_file>
+    <res_file name="res/Disk">
+        <uniqflag>Device</uniqflag>
+        <object_file>result/disk_status</object_file>
+        <graphtitle>Disk_Status</graphtitle>
+        <linelabel>rrqm/s wrqm/s</linelabel>
+        <x_y_label>Time(s) Device_IO</x_y_label>
+        <cmd>cat %s | egrep -v "Linux|^$|%s" | awk 'BEGIN {print "%s\n%s\n%s"}{if($1 ~/vdc/) print $2,$3}' >> %s</cmd>
+    </res_file>
 </abstract>
