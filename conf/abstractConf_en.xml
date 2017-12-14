@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8'?>
+<abstract>
+    <res_file name="res/CPU">
+        <uniqflag>CPU</uniqflag>
+        <object_file>result/cpu_status</object_file>
+        <graphtitle>Cpu_Status</graphtitle>
+        <linelabel>%user %system</linelabel>
+        <x_y_label>Time(s) Cpu_Percent(%)</x_y_label>
+        <cmd>cat %s | egrep -v "Linux|^$|%s" | awk 'BEGIN {print "%s\n%s\n%s"}{if($2 ~/AM|PM/) print $4,$6}' >> %s</cmd>
+    </res_file>
+    <res_file name="res/Memory">
+        <uniqflag>kbmemused</uniqflag>
+        <object_file>result/mem_status</object_file>
+        <graphtitle>Memory_Status</graphtitle>
+        <linelabel>%mem %mem+swap</linelabel>
+        <x_y_label>Time(s) Mem_Usage(%)</x_y_label>
+        <cmd>cat %s | egrep -v "Linux|^$|%s" | awk 'BEGIN {print "%s\n%s\n%s"}{if($2 ~/AM|PM/) print $5,$9}' >> %s</cmd>
+    </res_file>
+</abstract>
