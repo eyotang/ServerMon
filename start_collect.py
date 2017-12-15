@@ -21,7 +21,7 @@ from get_linking_number import GetLinkingNumber
 SERVERS_D = {'1935':'srs-rtmp','18080':'srs-hls','80':'nginx'} #可以输入srs或者nginx或者ATS
 
 #间隔时间
-INTERVAL_TIME = 10
+INTERVAL_TIME = 1
 
 
 class KPI_Collect(object):
@@ -101,7 +101,7 @@ class KPI_Collect(object):
         for server,num in zip(SERVERS_D.values(),self.TCP_COUNT):
             writeLog("INFO",r">>>>> 初始 %s 服务连接数 %d" %(server,num))
         curr_tcpN = self.getLinkNum.getLinkingNumber(SERVERS_D)
-        time.sleep(10)
+        time.sleep(INTERVAL_TIME)
         while True:
             if not sum(curr_tcpN) <= sum(self.TCP_COUNT):
                 start_times = time.time()
